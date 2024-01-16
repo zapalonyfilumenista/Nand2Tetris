@@ -1,0 +1,31 @@
+// Helper chip build to facilitate design of Mux4Way16
+// File name: projects/01/Mux4Way.hdl
+
+/**
+ * 4-way multiplexor: 
+ * for i = 0..15 out[i] = a[i] if sel == 0 
+ *                        b[i] if sel == 1
+ */
+
+CHIP Mux4Way {
+    IN a, b, c, d, sel[2];
+    OUT out;
+
+    PARTS:
+    Not(in=sel[0], out=notsel0);
+    Not(in=sel[1], out=notsel1);
+    
+    And(a=notsel1, b=sel[0], out=notsel1Andsel0);
+    And(a=sel[1], b=notsel0, out=sel1Andnotsel0);
+    And(a=sel[1], b=sel[0], out=sel1Andsel0);
+    And(a=notsel1, b=notsel0, out=notsel1Andnotsel0);
+
+    And(a=a, b=notsel1Andnotsel0, out=aAndnotsel1Andnotsel0);
+    And(a=b, b=notsel1Andsel0, out=bAndnotsel1Andsel0);
+    And(a=c, b=sel1Andnotsel0, out=cAndsel1Andnotsel0);
+    And(a=d, b=sel1Andsel0, out=dAndsel1Andsel0);
+
+    Or(a=aAndnotsel1Andnotsel0, b=bAndnotsel1Andsel0, out=temp1);
+    Or(a=temp1, b=cAndsel1Andnotsel0, out=temp2);
+    Or(a=temp2, b=dAndsel1Andsel0, out=out);
+}
